@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { AdminPanel } from '@/components/AdminPanel';
+import AdminPanel from '@/components/AdminPanel';
 
 export default async function AdminPage() {
   const supabase = await createClient();
