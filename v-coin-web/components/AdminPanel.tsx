@@ -50,7 +50,16 @@ export default function AdminPanel({ users }: AdminPanelProps) {
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type');
+
+if (!contentType?.includes('application/json')) {
+  const text = await res.text();
+  throw new Error(
+    `Server returned ${res.status}. Mint API route is unavailable.`
+  );
+}
+
+const data = await res.json();
 
       if (!res.ok) {
         throw new Error(data?.error || 'Mint failed');
