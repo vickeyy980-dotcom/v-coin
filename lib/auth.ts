@@ -1,0 +1,2 @@
+import { redirect } from 'next/navigation';import { createClient } from './supabase/server';
+export async function requireUser(){const s=createClient();const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login');const {data:profile}=await s.from('profiles').select('id,username,full_name,email,role,status,master_id').eq('id',user.id).single();if(!profile||profile.status!=='active')redirect('/login');return {supabase:s,user,profile};}

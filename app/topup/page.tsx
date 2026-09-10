@@ -1,0 +1,1 @@
+import { requireUser } from '@/lib/auth';import { RequestForm } from '@/components/RequestForm';import { Nav } from '@/components/Nav';export default async function P(){const {profile}=await requireUser();return <main className="wrap"><h1>V Coin top-up request</h1><RequestForm type="topup"/><Nav role={profile.role}/></main>}

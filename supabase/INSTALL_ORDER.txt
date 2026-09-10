@@ -1,0 +1,12 @@
+FRESH SUPABASE PROJECT
+1. schema.sql
+2. seed.sql
+3. BACKFILL_EXISTING_AUTH_USERS.sql   (only if Auth already contains users)
+4. make_admin.sql                     (after replacing the email)
+
+EXISTING TEST DATABASE WITH OLD V-COIN SCHEMA
+1. RESET_DEV_DATABASE.sql             (DELETES V Coin public data; keeps Auth users)
+2. schema.sql
+3. seed.sql
+4. BACKFILL_EXISTING_AUTH_USERS.sql
+5. make_admin.sql                     (replace email first)

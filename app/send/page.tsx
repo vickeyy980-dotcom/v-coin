@@ -1,0 +1,1 @@
+import { requireUser } from '@/lib/auth';import { SendForm } from '@/components/SendForm';import { Nav } from '@/components/Nav';export default async function Send(){const {profile}=await requireUser();return <main className="wrap"><h1>Send V Coin</h1><SendForm/><Nav role={profile.role}/></main>}
