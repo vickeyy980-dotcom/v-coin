@@ -1,1 +1,11 @@
-import { requireUser } from '@/lib/auth';import { Nav } from '@/components/Nav';export default async function History(){const {supabase,profile}=await requireUser();const {data:tx}=await supabase.from('wallet_transactions').select('*').order('created_at',{ascending:false}).limit(100);return <main className="wrap"><h1>Transaction history</h1><div className="card" style={{padding:18}}>{tx?.map(x=><div key={x.id} style={{padding:'12px 0',borderBottom:'1px solid #2a3043'}}><b>{x.transaction_type}</b> · {x.direction} {Number(x.amount).toFixed(2)} VC<div className="muted">{x.transaction_id} · {new Date(x.created_at).toLocaleString()}</div></div>)}</div><Nav role={profile.role}/></main>}
+import { requireUser } from '@/lib/auth';
+import { BottomNav } from '@/components/BottomNav';
+import { HistoryList } from '@/components/HistoryList';
+import { IconChip } from '@/components/ui';
+
+export default async function HistoryPage(){
+  const {supabase}=await requireUser();
+  const {data:tx}=await supabase.from('wallet_transactions').select('id,amount,created_at,direction').order('created_at',{ascending:false}).limit(100);
+  const rows=(tx||[]).map((x:any)=>({id:x.id,amount:Number(x.amount),created_at:x.created_at,direction:(x.direction==='CREDIT'?'received':'sent') as 'received'|'sent'}));
+  return <div className="flex min-h-screen flex-col"><main className="flex-1 px-5 pb-7 pt-4"><div className="mb-4 flex items-center justify-between"><h1 className="font-display text-[20px] font-bold">Activity</h1><IconChip name="clock" size={36} radius={18} color="text-brass"/></div><HistoryList rows={rows} currency="VC"/></main><BottomNav/></div>
+}

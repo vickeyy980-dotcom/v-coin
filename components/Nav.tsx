@@ -1,2 +1,4 @@
-import Link from 'next/link';
-export function Nav({role}:{role?:string|null}){return <nav className="card" style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:14,zIndex:20,width:'min(94%,760px)',padding:10,display:'flex',gap:6,justifyContent:'space-around'}}><Link href="/dashboard">Home</Link><Link href="/send">Send</Link><Link href="/receive">Receive</Link><Link href="/assets">Assets</Link><Link href="/history">History</Link><Link href="/profile">Profile</Link>{role==='admin'||role==='super_admin'?<Link href="/admin">Admin</Link>:null}{role==='master'?<Link href="/master">Master</Link>:null}</nav>}
+import { BottomNav } from './BottomNav';
+export function Nav({ role: _role }: { role?: string | null }) {
+  return <BottomNav />;
+}

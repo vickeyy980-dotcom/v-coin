@@ -1,1 +1,4 @@
-import { requireUser } from '@/lib/auth';import { SendForm } from '@/components/SendForm';import { Nav } from '@/components/Nav';export default async function Send(){const {profile}=await requireUser();return <main className="wrap"><h1>Send V Coin</h1><SendForm/><Nav role={profile.role}/></main>}
+import { requireUser } from '@/lib/auth';
+import { SendForm } from '@/components/SendForm';
+import { TopBar } from '@/components/ui';
+export default async function SendPage(){await requireUser();return <main className="flex min-h-screen flex-col px-5 pb-5 pt-2"><TopBar title="Send" backHref="/dashboard"/><SendForm/></main>}
