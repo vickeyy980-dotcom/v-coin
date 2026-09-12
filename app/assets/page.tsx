@@ -1,24 +1,68 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { AssetRow, IconChip, SectionHeader } from '@/components/ui';
+import { AssetRow, IconChip, PrimaryButton } from '@/components/ui';
 import { BottomNav } from '@/components/BottomNav';
 
-export default async function AssetsPage(){
-  const {supabase,profile}=await requireUser();
-  const {data:w}=await supabase.from('wallets').select('vcoin_balance,locked_balance,status').eq('user_id',profile.id).single();
-  const available=Number(w?.vcoin_balance||0)-Number(w?.locked_balance||0);
-  return <div className="flex min-h-screen flex-col"><main className="flex-1 px-5 pb-7 pt-4">
-    <div className="mb-5 flex items-center justify-between"><h1 className="font-display text-[20px] font-bold">Your assets</h1><IconChip name="wallet" size={36} radius={18} color="text-brass"/></div>
-    <div className="mb-5"><div className="text-[12.5px] text-muted">Available V Coin</div><div className="mt-1 font-display text-[30px] font-extrabold tabular-nums">{available.toFixed(2)} VC</div></div>
-    <div className="rounded-2xl border border-line bg-panel2 px-3">
-      <AssetRow mono="VC" name="V Coin" holding={`${Number(w?.vcoin_balance||0).toFixed(2)} total`} value={`${available.toFixed(2)} VC`} change={w?.status==='active'?'Active':'Frozen'} changeColor={w?.status==='active'?'text-green':'text-red'} />
+export default async function AssetsPage() {
+  const { supabase, profile } = await requireUser();
+  const { data: wallet } = await supabase
+    .from('wallets')
+    .select('vcoin_balance,locked_balance,status')
+    .eq('user_id', profile.id)
+    .single();
+
+  const total = Number(wallet?.vcoin_balance || 0);
+  const locked = Number(wallet?.locked_balance || 0);
+  const available = total - locked;
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto px-5 pb-6 pt-2">
+        <div className="mb-5 flex items-center justify-between">
+          <h1 className="font-display text-[19px] font-bold">Your assets</h1>
+          <IconChip name="bell" size={34} radius={17} color="text-cream" />
+        </div>
+
+        <div className="mb-5">
+          <div className="text-[12.5px] text-muted">Combined value</div>
+          <div className="mt-1 font-display text-[28px] font-extrabold tabular-nums">
+            ${available.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+        </div>
+
+        <AssetRow
+          mono="VC"
+          name="V Coin"
+          holding={`${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} VC`}
+          value={`$${available.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          change={wallet?.status === 'active' ? 'Active' : 'Frozen'}
+          changeColor={wallet?.status === 'active' ? 'text-green' : 'text-red'}
+        />
+
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <Link href="/topup" className="rounded-2xl border border-line bg-panel2 p-4">
+            <div className="text-[14px] font-semibold text-cream">Top up</div>
+            <div className="mt-1 text-[11.5px] text-muted-2">Request more VC</div>
+          </Link>
+          <Link href="/crypto" className="rounded-2xl border border-line bg-panel2 p-4">
+            <div className="text-[14px] font-semibold text-cream">Crypto</div>
+            <div className="mt-1 text-[11.5px] text-muted-2">Conversion request</div>
+          </Link>
+          <Link href="/bank" className="rounded-2xl border border-line bg-panel2 p-4">
+            <div className="text-[14px] font-semibold text-cream">Bank transfer</div>
+            <div className="mt-1 text-[11.5px] text-muted-2">Convert VC to bank</div>
+          </Link>
+          <Link href="/history" className="rounded-2xl border border-line bg-panel2 p-4">
+            <div className="text-[14px] font-semibold text-cream">History</div>
+            <div className="mt-1 text-[11.5px] text-muted-2">Wallet ledger</div>
+          </Link>
+        </div>
+
+        <div className="pb-2 pt-5">
+          <PrimaryButton href="/topup">Add funds</PrimaryButton>
+        </div>
+      </div>
+      <BottomNav />
     </div>
-    <div className="mt-6"><SectionHeader title="Asset operations"/></div>
-    <div className="grid grid-cols-2 gap-3">
-      <Link href="/topup" className="rounded-2xl border border-line bg-panel2 p-4"><div className="text-brass">Top up</div><div className="mt-1 text-[12px] text-muted">Request more VC</div></Link>
-      <Link href="/crypto" className="rounded-2xl border border-line bg-panel2 p-4"><div className="text-brass">Crypto</div><div className="mt-1 text-[12px] text-muted">Conversion request</div></Link>
-      <Link href="/bank" className="rounded-2xl border border-line bg-panel2 p-4"><div className="text-brass">Bank transfer</div><div className="mt-1 text-[12px] text-muted">Convert VC to bank</div></Link>
-      <Link href="/history" className="rounded-2xl border border-line bg-panel2 p-4"><div className="text-brass">History</div><div className="mt-1 text-[12px] text-muted">Wallet ledger</div></Link>
-    </div>
-  </main><BottomNav/></div>
+  );
 }

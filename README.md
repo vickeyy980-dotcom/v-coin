@@ -16,3 +16,9 @@ All wallet balance changes happen through SECURITY DEFINER database functions th
 
 ## Production note
 This is an application baseline, not a substitute for a security audit or legal review. If VC represents real value or converts to bank/crypto value, add KYC/AML, secure secret management, encryption/key management for bank data, monitoring, rate limiting, fraud controls, reconciliation, backups, and jurisdiction-specific compliance before launch.
+
+## Previous-design UI merge
+This package keeps the PDF-spec Supabase schema, secure transfer/admin/request APIs, and financial ledger logic, while restoring the earlier mobile dark-navy + brass/gold V Coin user interface for Login, Signup, Dashboard, Assets, Send, Receive, Scan, Activity, and Profile.
+
+## Previous UI restoration
+This package restores the original compact dark-navy/gold wallet UI. The user application is intentionally constrained to a 480px mobile-wallet shell on desktop while keeping the current Supabase financial backend and API routes.

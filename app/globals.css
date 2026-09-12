@@ -5,19 +5,14 @@
 :root {
   --font-manrope: 'Manrope', ui-sans-serif, sans-serif;
   --font-inter: 'Inter', ui-sans-serif, sans-serif;
-  color-scheme: dark;
 }
 
-html, body { margin: 0; min-height: 100%; background: #0b0c13; color: #eeeae0; }
-body { font-family: var(--font-inter); }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-a { text-decoration: none; color: inherit; }
+html,
+body {
+  background: #0b0c13;
+  color: #eeeae0;
+}
 
-/* Compatibility classes used by the new backend/admin/request screens. */
-.card { background:#181B27; border:1px solid rgba(238,234,224,.08); border-radius:22px; }
-.input { width:100%; border:1px solid rgba(238,234,224,.10); background:#242739; color:#EEEAE0; border-radius:16px; padding:.9rem 1rem; outline:none; }
-.btn { display:inline-flex; align-items:center; justify-content:center; border-radius:16px; padding:.85rem 1rem; font-weight:700; background:#C9A15A; color:#1A1406; }
-.btn2 { display:inline-flex; align-items:center; justify-content:center; border-radius:16px; padding:.8rem 1rem; border:1px solid rgba(238,234,224,.14); color:#C9A15A; }
-.muted { color:#94919C; }
-.wrap { width:100%; max-width:480px; margin:0 auto; padding:18px 20px 104px; }
-.gridcards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+* {
+  -webkit-tap-highlight-color: transparent;
+}
