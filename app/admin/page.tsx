@@ -3,6 +3,7 @@ import { requireUser } from '@/lib/auth';
 import { AdminDesktopPanel } from '@/components/AdminDesktopPanel';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminPage() {
   const { supabase, profile } = await requireUser();
@@ -22,10 +23,16 @@ export default async function AdminPage() {
     supabase.from('audit_logs').select('id,user_id,action,module,reference_id,new_data,created_at').order('created_at',{ascending:false}).limit(200),
   ]);
 
-  const users=(profilesR.data||[]).map((x:any)=>({
-    id:x.id, username:x.username, full_name:x.full_name, email:x.email, role:x.role, status:x.status, master_id:x.master_id,
-    balance:Number(x.wallets?.[0]?.vcoin_balance||0), address:x.wallets?.[0]?.wallet_address||null, wallet_status:x.wallets?.[0]?.status||'active'
-  }));
+  // Supabase can return a one-to-one relation as either an object or a one-item array.
+  // Normalize it here so a frozen wallet never gets incorrectly displayed as active.
+  const getWallet=(value:any)=>Array.isArray(value)?value[0]??null:value??null;
+  const users=(profilesR.data||[]).map((x:any)=>{
+    const wallet=getWallet(x.wallets);
+    return {
+      id:x.id, username:x.username, full_name:x.full_name, email:x.email, role:x.role, status:x.status, master_id:x.master_id,
+      balance:Number(wallet?.vcoin_balance||0), address:wallet?.wallet_address||null, wallet_status:wallet?.status||'active'
+    };
+  });
   const profileName=new Map(users.map((u:any)=>[u.id,u.username]));
   const joinUsername=(v:any)=>Array.isArray(v)?v[0]?.username:v?.username;
   const requests:any[]=[];
