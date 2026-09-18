@@ -12,7 +12,7 @@ export default async function DashboardPage(){
  const {supabase,profile}=await requireUser();
  const [{data:wallet},{data:transactions}]=await Promise.all([
   supabase.from('wallets').select('vcoin_balance,locked_balance,status').eq('user_id',profile.id).single(),
-  supabase.from('wallet_transactions').select('id,transaction_id,transaction_type,direction,amount,created_at,description').order('created_at',{ascending:false}).limit(3)
+  supabase.from('wallet_transactions').select('id,transaction_id,transaction_type,direction,amount,created_at,description,reference_id').order('created_at',{ascending:false}).limit(3)
  ]);
  const totalBalance=Number(wallet?.vcoin_balance||0);const displayName=profile.full_name||profile.username||'there';
  return <div className="flex flex-1 flex-col overflow-hidden"><div className="flex-1 overflow-y-auto px-5 pb-6 pt-2">
