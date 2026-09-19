@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SiteRealtimeSync } from '@/components/SiteRealtimeSync';
+import { PwaRegister } from '@/components/PwaRegister';
 
 export const metadata: Metadata = {
   title: 'V Coin',
   description: 'The everyday wallet for V Coin.',
+  manifest: '/manifest.webmanifest',
+  applicationName: 'V Coin',
+  appleWebApp: { capable: true, title: 'V Coin', statusBarStyle: 'black-translucent' },
+  icons: { icon: '/vcoin-icon.svg', apple: '/vcoin-icon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="font-body bg-ink text-cream"><SiteRealtimeSync/>
+      <body className="font-body bg-ink text-cream"><SiteRealtimeSync/><PwaRegister/>
         <div className="mx-auto flex min-h-screen max-w-[480px] flex-col bg-ink">{children}</div>
       </body>
     </html>
