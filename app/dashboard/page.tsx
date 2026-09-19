@@ -20,6 +20,6 @@ export default async function DashboardPage(){
   <div className="flex items-center justify-between"><div><div className="text-[12.5px] text-muted">{greeting()}</div><div className="font-display text-[19px] font-bold">{displayName}</div></div><Link href="/profile" className="relative"><IconChip name="bell" size={34} radius={17} color="text-cream"/><span className="absolute right-[7px] top-[6px] h-[7px] w-[7px] rounded-full border-2 border-panel2 bg-red"/></Link></div>
   <div className="mt-6"><BalanceCardLive userId={profile.id} initialBalance={totalBalance}/></div>
   <div className="my-6 flex justify-between"><QuickAction name="send" label="Send" href="/send"/><QuickAction name="receive" label="Receive" href="/receive"/><QuickAction name="scan" label="Scan" href="/scan"/><QuickAction name="plus" label="Top up" href="/topup"/></div>
-  <div><SectionHeader title="Recent activity" actionLabel="See all" actionHref="/history"/><LiveRecentActivity userId={profile.id} initialRows={(transactions||[]).map((x:any)=>({...x,amount:Number(x.amount)}))}/></div>
+  <div><SectionHeader title="Recent activity" actionLabel="See all" actionHref="/history"/><LiveRecentActivity userId={profile.id} walletId={wallet?.id || ''} initialRows={(transactions||[]).map((x:any)=>({...x,amount:Number(x.amount)}))}/></div>
  </div><BottomNav/></div>
 }
