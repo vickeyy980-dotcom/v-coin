@@ -38,7 +38,7 @@ export default function PaymentReceivedPopup({ payment, onClose }: Props) {
           player = module.default.loadAnimation({
             container: animationRef.current,
             renderer: "svg",
-            loop: false,
+            loop: true,
             autoplay: true,
             animationData,
           });
