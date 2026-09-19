@@ -1,0 +1,12 @@
+.backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(7, 13, 25, .74); backdrop-filter: blur(6px); }
+.dialog { position: relative; width: min(100%, 410px); padding: 18px 24px 28px; border: 1px solid #eac36855; border-radius: 24px; background: #131b2a; color: #fff; box-shadow: 0 25px 70px #0008; text-align: center; }
+.close { position: absolute; top: 12px; right: 16px; z-index: 1; border: 0; background: none; color: #dadce3; cursor: pointer; font-size: 30px; line-height: 1; }
+.coin { position: relative; width: 230px; height: 230px; margin: 0 auto; }
+.animation { position: absolute; inset: 0; }
+.staticCoin { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; border: 7px double #ffe18a; border-radius: 50%; background: #eda730; color: #fff7d4; font: 800 56px/88px system-ui, sans-serif; box-shadow: 0 7px 22px #f6ac4566; }
+.dialog h2 { margin: 0 0 8px; font-size: 25px; }
+.amount { margin: 0 0 8px; color: #f9cf74; font-size: 32px; font-weight: 800; }
+.detail { margin: 0 0 24px; color: #b9c2d0; }
+.done { width: 100%; padding: 12px 20px; border: 0; border-radius: 12px; background: #e6ae51; color: #192031; font-size: 16px; font-weight: 700; cursor: pointer; }
+.done:focus-visible, .close:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .animation { display: none; } .staticCoin { display: block; } }
