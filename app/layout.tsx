@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { SiteRealtimeSync } from '@/components/SiteRealtimeSync';
 
 export const metadata: Metadata = {
   title: 'V Coin',
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="font-body bg-ink text-cream">
+      <body className="font-body bg-ink text-cream"><SiteRealtimeSync/>
         <div className="mx-auto flex min-h-screen max-w-[480px] flex-col bg-ink">{children}</div>
       </body>
     </html>
