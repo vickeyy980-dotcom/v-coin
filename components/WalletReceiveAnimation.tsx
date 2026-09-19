@@ -1,19 +1,38 @@
 'use client';
-import { useEffect,useRef,useState } from 'react';
+import { useCallback,useEffect,useRef,useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import PaymentReceivedPopup,{type ReceivedPayment} from './PaymentReceivedPopup';
 
-type Payment={id:string;amount:number;sender:string};
 export default function WalletReceiveAnimation({walletId}:{walletId:string}){
- const [payment,setPayment]=useState<Payment|null>(null);const shown=useRef(new Set<string>());
- useEffect(()=>{if(!walletId)return;const s=createClient();const c=s.channel(`receive-animation-${walletId}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'wallet_transactions',filter:`wallet_id=eq.${walletId}`},async e=>{const row=e.new as any;if(String(row.direction).toUpperCase()!=='CREDIT')return;const kind=String(row.transaction_type||'').toUpperCase();const ref=String(row.reference_id||row.transaction_id||'');const desc=String(row.description||'');if(!(kind.includes('TRANSFER')||ref.startsWith('VCT-')||/from\s+@/i.test(desc)))return;const id=String(row.reference_id||row.transaction_id||row.id);if(shown.current.has(id))return;shown.current.add(id);let sender=(String(row.description||'').match(/from\s+@([^\s]+)/i)?.[1]||'user');if(id.startsWith('VCT-')){const {data:t}=await s.from('vcoin_transfers').select('sender_user_id').eq('transaction_id',id).maybeSingle();if(t?.sender_user_id){const {data:p}=await s.from('profiles').select('username').eq('id',t.sender_user_id).maybeSingle();if(p?.username)sender=p.username}}setPayment({id,amount:Number(row.amount||0),sender})}).subscribe();return()=>{s.removeChannel(c)}},[walletId]);
- if(!payment)return null;return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-5" onClick={()=>setPayment(null)}><div onClick={e=>e.stopPropagation()} className="w-full max-w-[390px] rounded-[30px] border border-line bg-panel2 px-6 pb-7 pt-5 text-center shadow-2xl"><div className="flex justify-end"><button onClick={()=>setPayment(null)} className="text-[30px] leading-none text-muted">×</button></div><div className="vc-stage mx-auto -mt-2 h-[190px] w-[190px]"><div className="vc-coin"><div className="vc-face">V</div><div className="vc-face vc-back">V</div></div><i className="vc-spark vc-s1"/><i className="vc-spark vc-s2"/><i className="vc-spark vc-s3"/><i className="vc-spark vc-s4"/></div><h2 className="font-display text-[24px] font-extrabold">Payment received!</h2><div className="mt-3 font-display text-[36px] font-extrabold text-green">+{payment.amount.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})} VC</div><div className="mt-2 text-[14px] text-muted">From @{payment.sender}</div><div className="mt-2 text-[11px] text-muted-2">{payment.id}</div><button onClick={()=>setPayment(null)} className="mt-6 w-full rounded-2xl bg-brass py-3.5 font-display font-bold text-[#1A1406]">Done</button><style jsx>{`
-.vc-stage{position:relative;perspective:800px;display:flex;align-items:center;justify-content:center}
-.vc-coin{position:relative;width:118px;height:118px;transform-style:preserve-3d;animation:vcFly 2.8s cubic-bezier(.2,.8,.2,1) both}
-.vc-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:50%;backface-visibility:hidden;background:radial-gradient(circle at 35% 30%,#ffe789 0,#d8aa4f 45%,#8b641d 100%);border:8px solid #e8bd61;box-shadow:inset 0 0 0 4px #8d651d,0 18px 35px rgba(216,170,79,.3);font-size:55px;font-weight:900;color:#191409}
-.vc-back{transform:rotateY(180deg)}
-.vc-spark{position:absolute;width:9px;height:9px;border-radius:50%;background:#d8aa4f;opacity:0;animation:vcSpark 1.2s .75s ease-out both}.vc-s1{left:15px;top:48px}.vc-s2{right:20px;top:28px}.vc-s3{left:38px;bottom:15px}.vc-s4{right:34px;bottom:28px}
-@keyframes vcFly{0%{opacity:0;transform:translateY(-70px) rotateY(0) scale(.25)}35%{opacity:1;transform:translateY(8px) rotateY(540deg) scale(1.12)}60%{transform:translateY(-5px) rotateY(720deg) scale(.96)}100%{transform:translateY(0) rotateY(1080deg) scale(1)}}
-@keyframes vcSpark{0%{opacity:0;transform:scale(.2)}40%{opacity:1;transform:scale(1.5)}100%{opacity:0;transform:translateY(-30px) scale(.3)}}
-@media(prefers-reduced-motion:reduce){.vc-coin,.vc-spark{animation:none}}
-`}</style></div></div>
+ const [payment,setPayment]=useState<ReceivedPayment|null>(null);
+ const shown=useRef(new Set<string>());
+ const close=useCallback(()=>setPayment(null),[]);
+ useEffect(()=>{
+  if(!walletId)return;
+  const s=createClient();
+  const c=s.channel(`receive-animation-${walletId}`).on('postgres_changes',{
+   event:'INSERT',schema:'public',table:'wallet_transactions',filter:`wallet_id=eq.${walletId}`
+  },async e=>{
+   const row=e.new as any;
+   if(String(row.direction).toUpperCase()!=='CREDIT')return;
+   const kind=String(row.transaction_type||'').toUpperCase();
+   const ref=String(row.reference_id||row.transaction_id||'');
+   const desc=String(row.description||'');
+   if(!(kind.includes('TRANSFER')||ref.startsWith('VCT-')||/from\s+@/i.test(desc)))return;
+   const id=String(row.reference_id||row.transaction_id||row.id);
+   const amount=Number(row.amount||0);
+   if(!id||!Number.isFinite(amount)||amount<=0||shown.current.has(id))return;
+   shown.current.add(id);
+   let senderName:string|undefined;
+   const match=desc.match(/from\s+@([^\s]+)/i);
+   if(match?.[1]) senderName=`@${match[1]}`;
+   if(!senderName&&id.startsWith('VCT-')){
+    const {data:t}=await s.from('vcoin_transfers').select('sender_user_id').eq('transaction_id',id).maybeSingle();
+    if(t?.sender_user_id){const {data:p}=await s.from('profiles').select('username').eq('id',t.sender_user_id).maybeSingle();if(p?.username)senderName=`@${p.username}`}
+   }
+   setPayment({id,amount,senderName,receivedAt:row.created_at||null});
+  }).subscribe();
+  return()=>{void s.removeChannel(c)};
+ },[walletId]);
+ return <PaymentReceivedPopup payment={payment} onClose={close}/>;
 }
