@@ -13,6 +13,10 @@ create unique index if not exists topup_requests_token_no_key on public.topup_re
 alter table public.topup_locations enable row level security;
 drop policy if exists topup_locations_read on public.topup_locations;
 create policy topup_locations_read on public.topup_locations for select to authenticated using (is_active=true or public.app_current_role() in ('super_admin','admin'));
+drop policy if exists topup_locations_admin_insert on public.topup_locations;
+create policy topup_locations_admin_insert on public.topup_locations for insert to authenticated with check (public.app_current_role() in ('super_admin','admin'));
+drop policy if exists topup_locations_admin_update on public.topup_locations;
+create policy topup_locations_admin_update on public.topup_locations for update to authenticated using (public.app_current_role() in ('super_admin','admin')) with check (public.app_current_role() in ('super_admin','admin'));
 do $$ begin alter publication supabase_realtime add table public.topup_locations; exception when duplicate_object then null; end $$;
 alter table public.topup_locations replica identity full;
 create or replace function public.create_topup_token_request(p_requested_vcoin numeric,p_city text,p_area text,p_area_code text,p_idempotency_key text)
