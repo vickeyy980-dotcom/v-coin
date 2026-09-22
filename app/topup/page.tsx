@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth';
-import { RequestForm } from '@/components/RequestForm';
+import { TopupTokenForm } from '@/components/TopupTokenForm';
 import { BottomNav } from '@/components/BottomNav';
 import { TopBar } from '@/components/ui';
-export default async function TopupPage(){await requireUser();return <div className="flex flex-1 flex-col overflow-hidden"><div className="flex-1 overflow-y-auto px-5 pb-6 pt-2"><TopBar title="Top up" backHref="/assets"/><div className="mt-5 rounded-card border border-line bg-panel2 p-5"><div className="font-display text-[17px] font-bold">Request V Coin</div><p className="mt-1 text-[12.5px] leading-5 text-muted">Enter the VC amount you want to add. Your configured top-up charge is calculated by the server.</p><div className="mt-5"><RequestForm type="topup"/></div></div></div><BottomNav/></div>}
+export default async function TopupPage(){await requireUser();return <div className="flex flex-1 flex-col overflow-hidden"><div className="flex-1 overflow-y-auto px-5 pb-6 pt-2"><TopBar title="Top up" backHref="/assets"/><div className="mt-5 rounded-card border border-line bg-panel2 p-5"><div className="font-display text-[17px] font-bold">Request V Coin</div><p className="mt-1 text-[12.5px] leading-5 text-muted">Enter your payment location and amount. The server will match the payment address and generate a unique 10-digit token.</p><div className="mt-5"><TopupTokenForm/></div></div></div><BottomNav/></div>}
