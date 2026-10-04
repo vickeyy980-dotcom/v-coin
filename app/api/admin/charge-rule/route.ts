@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-const allowedTypes=['WALLET_MAINTENANCE','INTERNAL_TRANSFER','VCOIN_TOPUP','CRYPTO_CONVERSION','BANK_TRANSFER'];
+const allowedTypes=['WALLET_MAINTENANCE','INTERNAL_TRANSFER','VCOIN_TOPUP','CRYPTO_CONVERSION','BANK_TRANSFER','CASH_OUT'];
 export async function POST(req:Request){
   try{
     const s=createClient(); const {data:{user}}=await s.auth.getUser();
@@ -22,7 +22,6 @@ export async function POST(req:Request){
     if(!['FIXED','PERCENTAGE'].includes(mode))return NextResponse.json({error:'Invalid charge mode'},{status:400});
     if(!Number.isFinite(value)||value<0)return NextResponse.json({error:'Invalid charge value'},{status:400});
     const row={master_id:b.master_id||null,charge_type:type,charge_mode:mode,charge_value:value,minimum_charge:b.minimum_charge==null?null:Number(b.minimum_charge),maximum_charge:b.maximum_charge==null?null:Number(b.maximum_charge),is_active:true,created_by:user.id};
-    // Keep one active rule for the same scope/type.
     let q=a.from('charge_rules').update({is_active:false}).eq('charge_type',type).eq('is_active',true);
     q=b.master_id?q.eq('master_id',String(b.master_id)):q.is('master_id',null); await q;
     const {data,error}=await a.from('charge_rules').insert(row).select('id').single();
