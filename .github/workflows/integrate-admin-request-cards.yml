@@ -1,0 +1,49 @@
+name: Integrate admin request cards
+
+on:
+  push:
+    paths:
+      - '.github/workflows/integrate-admin-request-cards.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Connect professional request cards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('components/AdminDesktopPanel.tsx')
+          text = p.read_text()
+          imp = "import { AdminRequestsCards } from './AdminRequestsCards';\n"
+          if imp not in text:
+              marker = "import s from './AdminDesktopPanel.module.css';\n"
+              if marker not in text:
+                  raise SystemExit('CSS import marker not found')
+              text = text.replace(marker, marker + imp, 1)
+          old = "{tab==='Requests'&&<Requests rows={requests} call={call}/>}"
+          new = "{tab==='Requests'&&<AdminRequestsCards rows={requests as any} call={call}/>}"
+          if old in text:
+              text = text.replace(old, new, 1)
+          elif new not in text:
+              raise SystemExit('Requests render marker not found')
+          p.write_text(text)
+          PY
+      - name: Commit integration
+        run: |
+          if git diff --quiet; then
+            echo "Already integrated"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add components/AdminDesktopPanel.tsx
+          git commit -m "Use professional cards for admin requests"
+          git push origin main
