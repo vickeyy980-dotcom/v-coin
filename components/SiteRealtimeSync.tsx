@@ -8,7 +8,7 @@ const TABLES=['wallets','wallet_transactions','topup_requests','crypto_conversio
 export function SiteRealtimeSync(){
  const router=useRouter(),pathname=usePathname();
  const audioRef=useRef<HTMLAudioElement|null>(null);
- const soundReadyRef=useRef(false);
+ const userIdRef=useRef<string|null>(null);
 
  useEffect(()=>{
   const audio=new Audio('/sounds/notification.mp3');
@@ -16,22 +16,20 @@ export function SiteRealtimeSync(){
   audio.volume=1;
   audioRef.current=audio;
 
-  // Browsers require a user interaction before notification audio can play.
-  // Unlock the audio on the user's first click/touch/key press without making an audible sound.
+  // Unlock audio after the first real user interaction.
   const unlock=()=>{
    const a=audioRef.current;
-   if(!a||soundReadyRef.current)return;
+   if(!a)return;
    const oldVolume=a.volume;
    a.volume=0;
    a.play().then(()=>{
     a.pause();
     a.currentTime=0;
     a.volume=oldVolume;
-    soundReadyRef.current=true;
    }).catch(()=>{a.volume=oldVolume;});
   };
-  window.addEventListener('pointerdown',unlock,{passive:true});
-  window.addEventListener('keydown',unlock);
+  window.addEventListener('pointerdown',unlock,{once:true,passive:true});
+  window.addEventListener('keydown',unlock,{once:true});
   return()=>{
    window.removeEventListener('pointerdown',unlock);
    window.removeEventListener('keydown',unlock);
@@ -43,19 +41,45 @@ export function SiteRealtimeSync(){
  useEffect(()=>{
   const s=createClient();
   let timer:ReturnType<typeof setTimeout>|null=null;
-  const refresh=()=>{if(timer)clearTimeout(timer);timer=setTimeout(()=>router.refresh(),120)};
-  const playNotification=()=>{
-   const a=audioRef.current;
-   if(a){a.currentTime=0;a.play().catch(()=>{});}
-   refresh();
-  };
+  let alive=true;
+  let channel:any=null;
+  const refresh=()=>{if(timer)clearTimeout(timer);timer=setTimeout(()=>router.refresh(),150)};
 
-  const c=s.channel('vcoin-site-realtime');
-  for(const table of TABLES)c.on('postgres_changes',{event:'*',schema:'public',table},refresh);
-  c.on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},playNotification);
-  c.on('postgres_changes',{event:'UPDATE',schema:'public',table:'notifications'},refresh);
-  c.subscribe();
-  return()=>{if(timer)clearTimeout(timer);s.removeChannel(c)};
+  const start=async()=>{
+   const {data:{user}}=await s.auth.getUser();
+   if(!alive)return;
+   userIdRef.current=user?.id||null;
+
+   channel=s.channel(`vcoin-site-realtime-${user?.id||'guest'}`);
+   for(const table of TABLES)channel.on('postgres_changes',{event:'*',schema:'public',table},refresh);
+
+   // Listen only for this signed-in user's notification. This makes the badge
+   // refresh and sound happen from the same INSERT event.
+   if(user?.id){
+    channel.on('postgres_changes',{
+     event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${user.id}`
+    },()=>{
+     const a=audioRef.current;
+     if(a){
+      a.currentTime=0;
+      a.volume=1;
+      a.play().catch(()=>{});
+     }
+     refresh();
+    });
+    channel.on('postgres_changes',{
+     event:'UPDATE',schema:'public',table:'notifications',filter:`user_id=eq.${user.id}`
+    },refresh);
+   }
+   channel.subscribe();
+  };
+  start();
+
+  return()=>{
+   alive=false;
+   if(timer)clearTimeout(timer);
+   if(channel)s.removeChannel(channel);
+  };
  },[router,pathname]);
  return null;
 }
