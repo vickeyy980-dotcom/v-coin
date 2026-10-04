@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import s from './AdminDesktopPanel.module.css';
+import { AdminRequestsCards } from './AdminRequestsCards';
 type User={id:string;username:string;full_name:string|null;email:string|null;role:string;status:string;master_id:string|null;balance:number;address:string|null;wallet_status:string};
 type Req={id:string;request_id:string;kind:'TOPUP'|'CRYPTO'|'BANK'|'CASHOUT';username:string;amount:number;charge:number;final_amount:number;status:string;created_at:string;token_no?:string|null;city?:string|null;area?:string|null;area_code?:string|null;payment_address?:string|null};
 type TopupLocation={id:string;city:string;area:string;area_code:string;payment_address:string;is_active:boolean};
@@ -21,7 +22,7 @@ export function AdminDesktopPanel(p:{signedInAs:string;users:User[];requests:Req
  {tab==='Overview'&&<Overview users={users} masters={masters} requests={requests} ledger={ledger} adminWallet={adminWallet} totalCommission={totalCommission} setTab={setTab}/>}
  {tab==='Masters'&&<Masters masters={masters} call={call}/>} {tab==='Users'&&<Users normals={normals} masters={masters} call={call}/>}
  {tab==='Wallet ledger'&&<section className={s.panel}><h2 className={s.panelTitle}>Wallet ledger</h2><LedgerTable rows={ledger}/></section>}
- {tab==='Requests'&&<Requests rows={requests} call={call}/>} {tab==='Top-up Locations'&&<TopupLocations rows={topupLocations} call={call}/>} {tab==='Charges'&&<Charges rules={chargeRules} masters={masters} call={call}/>}
+ {tab==='Requests'&&<AdminRequestsCards rows={requests as any} call={call}/>} {tab==='Top-up Locations'&&<TopupLocations rows={topupLocations} call={call}/>} {tab==='Charges'&&<Charges rules={chargeRules} masters={masters} call={call}/>}
  {tab==='Commissions'&&<Commissions masters={masters} rules={commissionRules} rows={commissions} call={call}/>}
  {tab==='Permissions'&&<Permissions masters={masters} permissions={permissions} current={userPermissions} call={call}/>} {tab==='Audit log'&&<AuditLog rows={audit}/>}</main></div>}
 function Overview({users,masters,requests,ledger,adminWallet,totalCommission,setTab}:any){return <><div className={s.cards}><K label="Wallet balance" value={`${adminWallet.toFixed(2)} VC`}/><K label="Active users" value={String(users.filter((u:User)=>u.status==='active').length)}/><K label="Total commission" value={`${totalCommission.toFixed(2)} VC`}/><K label="Masters" value={String(masters.length)}/><K label="Pending requests" value={String(requests.filter((r:Req)=>r.status==='pending').length)}/></div><div className={s.grid2}><section className={s.panel}><div className={s.sectionHead}><h2 className={s.panelTitle}>Recent wallet ledger</h2><button className={s.dark} onClick={()=>setTab('Wallet ledger')}>View all</button></div><LedgerTable rows={ledger.slice(0,10)}/></section><section className={s.panel}><h2 className={s.panelTitle}>Quick actions</h2><div className={s.actions}>{['Users','Masters','Requests','Charges','Commissions','Permissions'].map(x=><button key={x} className={s.dark} onClick={()=>setTab(x)}>{x}</button>)}</div></section></div></>}
